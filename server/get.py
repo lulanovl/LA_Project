@@ -2,14 +2,18 @@ from .local_data import category
 from .data_matrix import matrix
 
 def food():
-    output = []
+    output = dict()
     keys = []
     for key, attribute in matrix.items():
         if attribute[0]:
             keys.append(key)
+    id = 0
     for place in keys:
         if place in category:
-            output.append(category[place])
+            output[id] = category[place]
+            id += 1
+    print(output)
+    print("adawd")
     return output
 
 def entertainment():

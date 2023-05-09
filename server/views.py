@@ -32,7 +32,7 @@ def get_food(request):
         
         answer = food()
 
-        return Response(answer, status=status.HTTP_200_OK)
+        return Response(answer, status=status.HTTP_200_OK, headers={'Content-Type': 'application/json'})
 
 
 @api_view(['GET'])
