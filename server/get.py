@@ -1,7 +1,7 @@
 from .local_data import category
 from .data_matrix import matrix
 
-#
+
 def food():
     output = dict()
     keys = []
@@ -13,11 +13,6 @@ def food():
         if place in category:
             output[id] = category[place]
             id += 1
-<<<<<<< HEAD
-    print(output)
-    print("adawd")
-=======
->>>>>>> fb3fab1cb75928102122f37f7c5918ca8efb3432
     return output
 
 def entertainment():
