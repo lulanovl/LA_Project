@@ -1,26 +1,14 @@
 from scipy.spatial.distance import cosine
+import numpy as np
+import math
 
 
 
 def cosine_similarity(x, y):
-    """
-    Compute the cosine similarity between two sparse binary vectors x and y.
-
-    Parameters:
-    x (numpy array): The first sparse binary vector.
-    y (numpy array): The second sparse binary vector.
-
-    Returns:
-    similarity (float): The cosine similarity between x and y.
-    """
-    # Compute the cosine distance between x and y
-    distance = cosine(x, y)
-
-    # Compute the cosine similarity as 1 - cosine distance
-    similarity = 1 - distance
-
-    return similarity
-
+    dot_product = np.dot(x, y.T)
+    norm_x = np.linalg.norm(x)
+    norm_y = np.linalg.norm(y, axis=1)
+    return dot_product / (norm_x * norm_y)
 
 
 
@@ -28,6 +16,73 @@ def argsort(seq):
     return sorted(range(len(seq)), key=seq.__getitem__)
 
 
+
+class TruncatedSVD:
+    def __init__(self, n_components):
+        self.n_components = n_components
+        self.U = None
+        self.S = None
+        self.Vt = None
+
+    def fit_transform(self, X):
+        # Step 1: Compute the Singular Value Decomposition of X
+        U, S, Vt = self._svd(X)
+        
+        # Step 2: Reduce the dimensionality of X by truncating the SVD
+        self.U = U[:, :self.n_components]
+        self.S = S[:self.n_components]
+        self.Vt = Vt[:self.n_components, :]
+        X_reduced = np.dot(self.U, np.dot(np.diag(self.S), self.Vt))
+
+        return X_reduced
+
+    def _svd(self, X):
+        # Compute the Singular Value Decomposition of X using the SVD algorithm
+        # implemented in the numpy.linalg.svd() function.
+        return np.linalg.svd(X)
+
+
+
+class TfidfVectorizer:
+    
+    def __init__(self, analyzer='word'):
+        self.idf = {}
+        self.vocab = set()
+        self.analyzer = analyzer
+
+    def fit_transform(self, corpus):
+        # Step 1: Tokenize the documents
+        if self.analyzer == 'word':
+            tokenized_corpus = [doc.lower().split() for doc in corpus]
+        elif self.analyzer == 'char':
+            tokenized_corpus = [list(doc.lower()) for doc in corpus]
+        else:
+            raise ValueError("Invalid analyzer type. Valid options are 'word' or 'char'.")
+        
+        # Step 2: Compute the term frequency (TF) for each word in each document
+        tf = []
+        for doc in tokenized_corpus:
+            doc_tf = {}
+            for word in doc:
+                doc_tf[word] = doc_tf.get(word, 0) + 1
+                self.vocab.add(word)
+            tf.append(doc_tf)
+        
+        # Step 3: Compute the inverse document frequency (IDF) for each word in the corpus
+        num_docs = len(tokenized_corpus)
+        for word in self.vocab:
+            doc_count = sum([1 for doc in tokenized_corpus if word in doc])
+            self.idf[word] = math.log(num_docs / doc_count)
+
+        # Step 4: Compute the TF-IDF score for each word in each document
+        tf_idf = []
+        for doc_tf in tf:
+            doc_tf_idf = {}
+            for word in doc_tf:
+                doc_tf_idf[word] = doc_tf[word] * self.idf[word]
+            tf_idf.append(doc_tf_idf)
+
+        return tf_idf
 
 
 
@@ -67,8 +122,6 @@ def csr_matrix(data, indices, indptr, shape):
     csr_indptr = indptr.copy()
     csr_shape = shape
     return (csr_data, csr_row_indices, csr_indptr, csr_shape)
-
-
 
 
 
