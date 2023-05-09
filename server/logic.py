@@ -1,11 +1,12 @@
 import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 import ast
 from .local_data import category
 from .data_matrix import places
 from .functions import argsort
+from .functions import cosine_similarity
+
 
 
 
@@ -33,6 +34,8 @@ def recommend_places(place_attributes, user_preferences, k=5, n_components = 10)
     recommendations = [list(place_attributes.keys())[i] for i in indices]
 
     return recommendations
+
+
 
 def matching_algo(user_likes):
 
